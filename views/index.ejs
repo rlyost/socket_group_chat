@@ -20,6 +20,7 @@
             // this triggers the connection event in our server!
             var socket  = io.connect();
             // we'll write all the socket stuff after the above line!
+            //Gets new user at log on
             function getUser() {
                 var person = prompt("Please enter your name", "Name...");
                 if (person != null) {
@@ -30,12 +31,14 @@
             };
             getUser();
 
+            //posts new message on click
             $(document).on('click', '#postmsg', function(){
                 var message = document.getElementById('message').value;
                 console.log(message);
                 socket.emit( "add_new_msg", { message: message });
                 $('input[type="text"], textarea').val('');
             });
+            //posts new message on enter
             $(document).on('keydown', '#message', function(e){
                 if (e.keyCode === 13) {
                     var message = document.getElementById('message').value;
@@ -44,10 +47,12 @@
                     $('input[type="text"], textarea').val('');
                 };
             });
+            //creates room for new user
             socket.on( 'create_room', function (data){
                 $(data).appendTo('#board').hide().fadeIn(1500);
             });
             socket.on( 'update_room', function (data){
+                //ensures that the window is always scrolled to the bottom
                 var out = document.getElementById("chat_win");
                 var isScrolledToBottom = out.scrollHeight - out.clientHeight <= out.scrollTop + 1;
                 $(data).appendTo('#chat_win').hide().fadeIn(500);
@@ -55,12 +60,6 @@
                     out.scrollTop = out.scrollHeight - out.clientHeight;
                 };
             });
-            // socket.on( 'left_room', function (data){
-            //     var x = "#"+data;
-            //     $(x).fadeOut(1500, function(){ 
-            //         $(this).remove();
-            //     });
-            // });
         });
     </script>
 </head>
