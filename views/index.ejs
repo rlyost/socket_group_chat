@@ -44,6 +44,7 @@
                     var message = document.getElementById('message').value;
                     console.log(message);
                     socket.emit( "add_new_msg", { message: message });
+                    //clears message box between messages
                     $('input[type="text"], textarea').val('');
                 };
             });
@@ -51,6 +52,7 @@
             socket.on( 'create_room', function (data){
                 $(data).appendTo('#board').hide().fadeIn(1500);
             });
+            //posts new message in the message window
             socket.on( 'update_room', function (data){
                 //ensures that the window is always scrolled to the bottom
                 var out = document.getElementById("chat_win");
