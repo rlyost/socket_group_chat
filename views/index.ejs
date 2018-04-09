@@ -4,10 +4,11 @@
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="Content-Security-Policy" content="default-src *; style-src * 'unsafe-inline'; script-src * 'unsafe-inline' 'unsafe-eval'; img-src * data: 'unsafe-inline' 'unsafe-eval'; connect-src * 'unsafe-inline'; frame-src *;"
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <link rel='stylesheet' type='text/css' href="{{ url_for('static', filename='group.css')}}">
+    <link rel="stylesheet" type="text/css" href="group.css" />
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
@@ -20,7 +21,7 @@
             var socket  = io.connect();
             // we'll write all the socket stuff after the above line!
             function getUser() {
-                var person = prompt("Please enter your full name", "Name...");
+                var person = prompt("Please enter your name", "Name...");
                 if (person != null) {
                     console.log(person);
                     var new_person = { 'name': person };
@@ -28,45 +29,45 @@
                 };
             };
             getUser();
-            $('.posting_form').submit(function(event){
-                event.preventDefault();
-                var msg_data = { 'message': $('#message').val() }
-                socket.emit( "add_new_msg", msg_data);
+
+            $(document).on('click', '#postmsg', function(){
+                var message = document.getElementById('message').value;
+                console.log(message);
+                socket.emit( "add_new_msg", { message: message });
+                $('input[type="text"], textarea').val('');
+            });
+            $(document).on('keydown', '#message', function(e){
+                if (e.keyCode === 13) {
+                    var message = document.getElementById('message').value;
+                    console.log(message);
+                    socket.emit( "add_new_msg", { message: message });
+                    $('input[type="text"], textarea').val('');
+                };
             });
             socket.on( 'create_room', function (data){
                 $(data).appendTo('#board').hide().fadeIn(1500);
             });
             socket.on( 'update_room', function (data){
-                $(data).appendTo('#chat_win').hide().fadeIn(1500);
+                var out = document.getElementById("chat_win");
+                var isScrolledToBottom = out.scrollHeight - out.clientHeight <= out.scrollTop + 1;
+                $(data).appendTo('#chat_win').hide().fadeIn(500);
+                if(isScrolledToBottom){
+                    out.scrollTop = out.scrollHeight - out.clientHeight;
+                };
             });
-            socket.on( 'left_room', function (data){
-                var x = "#"+data;
-                $(x).fadeOut(1500, function(){ 
-                    $(this).remove();
-                });
-            });
+            // socket.on( 'left_room', function (data){
+            //     var x = "#"+data;
+            //     $(x).fadeOut(1500, function(){ 
+            //         $(this).remove();
+            //     });
+            // });
         });
     </script>
 </head>
 <body>
     <div class='container'>
-        <div id='chat_room' class='border border-dark w-100 p-3 fader'>
-            <div id='board'>
-                <h3><u>Ninja Talk...</u></h3>
-                <div class='d-inline-block border border-dark w-100 p-3' style="height: 600px;" id='chat_win'>
-                    <dl class="row d-inline-block">
-                        <dt class="col-sm-4 d-inline">Name:</dt>
-                        <dd class="col-sm-12 d-inline">message</dd>
-                    </dl>
-                </div>
-                <form class="posting_form" method='post'>    
-                    <div class="form-group mx-auto"> 
-                        <input type='text' placeholder="enter message here..." class="form-control w-100 p-3" id="message" name='message'>
-                        <input type='hidden' id='userid' name="userid">
-                        <input type='submit' class='btn btn-outline-primary btn-lg' value='Send'>
-                    </div>
-                </form>
-            </div>
+        <div id='chat_room' class='border border-dark w-100 p-3'>
+            <div id='board'></div>
         </div>
     </div>
 </body>
